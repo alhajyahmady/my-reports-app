@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Report</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script src="firebase.js"></script>
+  <style>
+    body {
+      background-color: #f0f2f5;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .box {
+      background: white;
+      padding: 30px;
+      width: 400px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    textarea, input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Submit Daily Report</h2>
+    <textarea id="report" rows="6" placeholder="Write your daily report here..."></textarea>
+    <input type="text" id="remark" placeholder="Manager Remark (optional)">
+    <button onclick="submitReport()">Submit</button>
+  </div>
+
+  <script>
+    firebase.auth().onAuthStateChanged((user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      }
+    });
+
+    function submitReport() {
+      const reportText = document.getElementById("report").value;
+      const remark = document.getElementById("remark").value;
+      const user = firebase.auth().currentUser;
+
+      if (!reportText) {
+        alert("Please write your report before submitting.");
+        return;
+      }
+
+      firebase.database().ref("reports/").push({
+        userId: user.uid,
+        report: reportText,
+        managerRemark: remark,
+        date: new Date().toLocaleString()
+      });
+
+      alert("Report submitted successfully!");
+      document.getElementById("report").value = "";
+      document.getElementById("remark").value = "";
+    }
+  </script>
+  <button id="logoutBtn" style="background:red; color:white; margin-top:15px; padding:8px 15px; border:none; border-radius:5px; cursor:pointer;">Logout</button>
+
+<script>
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    firebase.auth().signOut().then(() => {
+      window.location.href = "login.html";
+    });
+  });
+</script>
+</body>
+</html>
